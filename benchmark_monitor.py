@@ -23,7 +23,7 @@ def ensureDir(file_path):
 def create_parser():
     parser = ArgumentParser(description='Performs a sliding window analysis of benchmark history in order to help spot slowdown in performance and provide an estimate on where the slowdown occurred. Generates a plot of each benchmark performance with a graphical indicator as to where the most recent step change (slowdown) in performance occurred')
     parser.add_argument('-d', '--directory', help="Directory containing benchmark result json files to process")
-    parser.add_argument('-w', '--slidingwindow', help="The size of the benchmark comparison sliding window", type=int, default=3)
+    parser.add_argument('-w', '--slidingwindow', help="The size of the benchmark comparison sliding window", type=int, default=9)
     parser.add_argument('-s', '--maxsamples', help="The maximum number of benchmarks (including slidingwindow) to run analysis on (0 == all builds)", type=int, default=0)
     parser.add_argument('-f', '--medianfilter', help="The median filter kernel size i.e. the number of points around each data value to smooth accross in order to eliminate temporary peaks and troughs in benchmark performance", type=int, default=3)
     parser.add_argument('-a', '--alphavalue', help="The alpha value at which we reject the hypothesis that the sliding window of benchmarks equals the benchmark history. Typical value is around 0.05 to 0.01. The noisier the environment the lower this value should be.", type=float, default=0.05)
@@ -79,11 +79,9 @@ def estimateStepLocation(values):
     if(len(peaks)) == 0:
         return 0;
     
+    # plot slowdown location indicator
     step_max_idx  = peaks[-1]
-    
-    plt.plot(dary)
-    plt.plot(dary_step/10)
-    plt.plot((step_max_idx, step_max_idx), (dary_step[step_max_idx]/10, 0), 'r')
+    plt.plot((step_max_idx, step_max_idx), (np.min(values), np.max(values)), 'r')
     
     return step_max_idx
     
@@ -113,6 +111,30 @@ def hasSlowedDown(benchmark, raw_values, smoothedvalues, slidingwindow, alphaval
             return True;
         print('\tStep change doesnt appear to be part of a trend')
     return False
+
+def smooth(x,window_len=11,window='hanning'):
+    # references: https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html
+    if x.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+
+    if x.size < window_len:
+        raise ValueError("Input vector needs to be bigger than window size.")
+
+    if window_len<3:
+        return x
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+
+    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+    #print(len(s))
+    if window == 'flat': #moving average
+        w=np.ones(window_len,'d')
+    else:
+        w=eval('np.'+window+'(window_len)')
+
+    y=np.convolve(w/w.sum(),s,mode='valid')
+    return y
 
 def main():
     args = create_parser()
@@ -165,8 +187,8 @@ def main():
             print('BENCHMARK: ' + benchmark + ' needs more data, skipping...')
             continue
             
-        # apply a median filter to the data to smooth out temporary spikes    
-        smoothedValues = signal.medfilt(raw_values, args.medianfilter)
+        # apply a median filter to the data to smooth out temporary spikes
+        smoothedValues = smooth(np.array(raw_values), args.medianfilter)
 
         # has it slowed down?
         if hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, args.metric):
