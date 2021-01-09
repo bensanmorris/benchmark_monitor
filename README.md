@@ -1,27 +1,14 @@
-# TLDR
+# Automated performance monitoring
 
-A performance monitoring utility that complements Google benchmark by generating a benchmark history report with estimated location of code slowdown. Ideally run during CI post benchmark execution to ensure your software benchmarks haven't experienced a step change (slowdown) in performance:
+A small utility that looks for step changes (slowdowns) in your google benchmark run history. The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). 
 
 ```
-benchmark_monitor.py -d [your_benchmark_performance_history_directory]
+benchmark_monitor.py -d [your_google_benchmark_performance_history_directory]
 ```
 
 A sample report:
 
 ![](charts.PNG)
-
-**Recommended usage:**
-
-- Run your benchmarks as part of each CI run and store in a persistent location (allow your benchmark run history to accumulate)
-- Run benchmark_monitor.py (against your accumulated benchmark history) 
-
-**Customising the report:**
-
-The report is formatted using the Jinja2 template library. The report's template can be found in the **templates** directory.
-
-# Automated performance monitoring
-
-A short demo illustrating how to automate performance monitoring. Google benchmark has been adopted as it's mature, feature rich and supports exporting benchmark results (json|xml). The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This proof of concept instead looks for consistent step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks. 
 
 # The algorithm
 
@@ -87,6 +74,10 @@ optional arguments:
                         The index.html report output directory
 ```
 
+**Customising the report:**
+
+The report is formatted using the Jinja2 template library. The report's template can be found in the **templates** directory.
+
 ## Demo overview:
 
 Demo prerequisites:
@@ -106,8 +97,8 @@ The format of this step by step demo:
 
 clone this repo and cd into it:
 ```
-git clone https://github.com/bensanmorris/benchmark_monitor.git
-cd benchmark_monitor
+git clone https://github.com/bensanmorris/automated_perf_monitoring.git
+cd automated_perf_monitoring
 ```
 
 create a python virtual environment, activate it and install required packages:
@@ -156,6 +147,5 @@ for /L %a in (1,1,10) Do Release\max_sub_array.exe --benchmark_out=%aresults.jso
 
 # Improvements (Future Work)
 
-1. **Improved spike / trough removal** - currently uses median filtering but other forms of filtering should be explored that remove high frequency spikes and troughs whilst preserving low frequency step changes
-2. **Removing background noise** - step changes in benchmark performance can occurr when the benchmark machine consistently slows down (or speeds up). This can be removed using signal processing techniques (i.e. spectral subtraction) if the noise signal can be captured in parralel with the benchmark. This might be done by capturing a "tick" sample at regular intervals during the course of running each benchmark that can be subtracted from the benchmark signal (where the benchmark signal = clean signal + noise signal)  
-3. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
+1. **Removing background noise** - step changes in benchmark performance can occurr when the benchmark machine consistently slows down (or speeds up). This can be removed using signal processing techniques (i.e. spectral subtraction) if the noise signal can be captured in parralel with the benchmark. This might be done by capturing a "tick" sample at regular intervals during the course of running each benchmark that can be subtracted from the benchmark signal (where the benchmark signal = clean signal + noise signal)  
+2. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
