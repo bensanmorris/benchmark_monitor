@@ -1,27 +1,14 @@
-# TLDR
+# Automated performance monitoring
 
-A performance monitoring utility that complements Google benchmark by generating a benchmark history report with estimated location of code slowdown. Ideally run during CI post benchmark execution to ensure your software benchmarks haven't experienced a step change (slowdown) in performance:
+A utility to assist in automating performance monitoring of your google benchmark benchmarks with a complete step by step guide below on its use. The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This proof of concept instead looks for consistent step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks. 
 
 ```
-benchmark_monitor.py -d [your_benchmark_performance_history_directory]
+rolling_compare.py -d [your_google_benchmark_performance_history_directory]
 ```
 
 A sample report:
 
 ![](charts.PNG)
-
-**Recommended usage:**
-
-- Run your benchmarks as part of each CI run and store in a persistent location (allow your benchmark run history to accumulate)
-- Run benchmark_monitor.py (against your accumulated benchmark history) 
-
-**Customising the report:**
-
-The report is formatted using the Jinja2 template library. The report's template can be found in the **templates** directory.
-
-# Automated performance monitoring
-
-A short demo illustrating how to automate performance monitoring. Google benchmark has been adopted as it's mature, feature rich and supports exporting benchmark results (json|xml). The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This proof of concept instead looks for consistent step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks. 
 
 # The algorithm
 
@@ -31,12 +18,12 @@ This proof of concept follows the **sliding window** approach described [here](h
 2. Perform a statistical test on the benchmark history (comparing the sliding window of recent builds against the build history) to determine if there's a step change in prformance (slowdown)
 3. Estimate the location of the step change
 
-# The utility (benchmark_monitor.py)
+# The utility (rolling_compare.py)
 
-A small python utility (benchmark_monitor.py) is provided to assist in identifying step changes (using the above approach). Run it over a directory containing your **benchmark performance history** (benchmark performance history = google benchmark json output) to generate an **index.html report** displaying your benchmark's performance along with a graphical step (slowdown) estimation indicator:
+A small python utility (rolling_compare.py) is provided to assist in identifying step changes (using the above approach). Run it over a directory containing your **benchmark performance history** (benchmark performance history = google benchmark json output) to generate an **index.html report** displaying your benchmark's performance along with a graphical step (slowdown) estimation indicator:
 
 ```
-usage: benchmark_monitor.py [-h] [-d DIRECTORY] [-w SLIDINGWINDOW]
+usage: rolling_compare.py [-h] [-d DIRECTORY] [-w SLIDINGWINDOW]
                           [-s MAXSAMPLES] [-f MEDIANFILTER] [-a ALPHAVALUE]
                           [-c CONTROLBENCHMARKNAME] [-x DISCARD]
                           [-sx STARTINDEX] [-ex ENDINDEX] [-m METRIC]
@@ -87,6 +74,10 @@ optional arguments:
                         The index.html report output directory
 ```
 
+**Customising the report:**
+
+The report is formatted using the Jinja2 template library. The report's template can be found in the **templates** directory.
+
 ## Demo overview:
 
 Demo prerequisites:
@@ -106,8 +97,8 @@ The format of this step by step demo:
 
 clone this repo and cd into it:
 ```
-git clone https://github.com/bensanmorris/benchmark_monitor.git
-cd benchmark_monitor
+git clone https://github.com/bensanmorris/automated_perf_monitoring.git
+cd automated_perf_monitoring
 ```
 
 create a python virtual environment, activate it and install required packages:
@@ -128,16 +119,16 @@ cd build
 cmake --build . --config Release
 ```
 
-next, run the line below (it will simulate 30 builds, each time running and outputting the benchmark results to a separate file to simulate a build history). After each build, an analysis (benchmark_monitor.py) is run to see if the benchmark results indicate a slowdown:
+next, run the line below (it will simulate 30 builds, each time running and outputting the benchmark results to a separate file to simulate a build history). After each build, an analysis (rolling_compare.py) is run to see if the benchmark results indicate a slowdown:
 
 ```
 (in a windows cmd prompt)
-for /L %a in (1,1,30) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -a 0.01
+for /L %a in (1,1,30) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\rolling_compare.py -d . -w 6 -a 0.01
 ```
 
 **nb. You can tune the analysis by decreasing the alpha value (the default is 0.05) ie. the noisier the environment is the lower the alpha value should be i.e. above I've assumed a relatively noisy machine so set the alpha value to 0.01**
 
-benchmark_monitor.py will report `BENCHMARK [benchmark_name] STEP CHANGE IN PERFORMANCE ENCOUNTERED` for each benchmark that appears to have a consistent step change in its performance when comparing the "recent builds window" (the -b parameter to benchmark_monitor that indicates the size of the recent build window which, in the case above is set to 6). 
+rolling_compare.py will report `BENCHMARK [benchmark_name] STEP CHANGE IN PERFORMANCE ENCOUNTERED` for each benchmark that appears to have a consistent step change in its performance when comparing the "recent builds window" (the -b parameter to rolling_compare that indicates the size of the recent build window which, in the case above is set to 6). 
 
 next, let's introduce a slow down in the code, to do this, open main.cpp and uncomment the line beneath the `// UNCOMMENT THIS` comment
 
@@ -149,7 +140,7 @@ cmake --build . --config Release
 next, perform 10 more runs of the benchmark and, after each build, run an analysis to see if the benchmark results indicate a slowdown:
 ```
 (in a windows cmd prompt)
-for /L %a in (1,1,10) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6
+for /L %a in (1,1,10) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\rolling_compare.py -d . -w 6
 ```
 
 **Finally, you can simulate a noisy environment by re-running the experiment whilst performing other tasks on your machine. If you do this then you should decrease the alpha value as described above.**
