@@ -102,7 +102,7 @@ The format of this step by step demo:
 
 clone this repo and cd into it:
 ```
-git clone https://github.com/bensanmorris/automated_perf_monitoring.git
+git clone https://github.com/bensanmorris/benchmark_monitor.git
 cd automated_perf_monitoring
 ```
 
