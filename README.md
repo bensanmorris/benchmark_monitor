@@ -103,7 +103,7 @@ The format of this step by step demo:
 clone this repo and cd into it:
 ```
 git clone https://github.com/bensanmorris/benchmark_monitor.git
-cd automated_perf_monitoring
+cd benchmark_monitor
 ```
 
 create a python virtual environment, activate it and install required packages:
