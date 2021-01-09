@@ -148,7 +148,7 @@ next, perform 20 more runs of the benchmark and, after each build, run an analys
 for /L %a in (1,1,20) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6
 ```
 
-**Finally, you can simulate a noisy environment by re-running the experiment whilst performing other tasks on your machine. If you do this then you should decrease the alpha value as described above.**
+**Finally, open index.html and inspect. Nb. you can simulate a noisy environment by re-running the experiment whilst performing other tasks on your machine. If you do this then you should decrease the alpha value as described above.**
 
 # Improvements (Future Work)
 
