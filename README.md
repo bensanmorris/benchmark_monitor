@@ -17,7 +17,7 @@ A sample report:
 
 # The algorithm
 
-This proof of concept follows the **sliding window** approach described [here](https://en.wikipedia.org/wiki/Step_detection#Sliding_window) with variations. In summary:
+This utility follows the **sliding window** approach described [here](https://en.wikipedia.org/wiki/Step_detection#Sliding_window) with variations. In summary:
 
 1. Apply a filter to the benchmark results history (this smoothes out spikes and troughs when running benchmarks owing to intermittent background machine activity but doesn't eliminate step changes in performance)
 2. Perform a statistical test on the benchmark history (comparing the sliding window of recent builds against the build history) to determine if there's a step change in prformance (slowdown)
