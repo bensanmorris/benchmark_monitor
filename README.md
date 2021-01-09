@@ -3,7 +3,7 @@
 A small utility that looks for step changes (slowdowns) in your google benchmark run history. The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). 
 
 ```
-rolling_compare.py -d [your_google_benchmark_performance_history_directory]
+benchmark_monitor.py -d [your_google_benchmark_performance_history_directory]
 ```
 
 A sample report:
@@ -18,12 +18,12 @@ This proof of concept follows the **sliding window** approach described [here](h
 2. Perform a statistical test on the benchmark history (comparing the sliding window of recent builds against the build history) to determine if there's a step change in prformance (slowdown)
 3. Estimate the location of the step change
 
-# The utility (rolling_compare.py)
+# The utility (benchmark_monitor.py)
 
-A small python utility (rolling_compare.py) is provided to assist in identifying step changes (using the above approach). Run it over a directory containing your **benchmark performance history** (benchmark performance history = google benchmark json output) to generate an **index.html report** displaying your benchmark's performance along with a graphical step (slowdown) estimation indicator:
+A small python utility (benchmark_monitor.py) is provided to assist in identifying step changes (using the above approach). Run it over a directory containing your **benchmark performance history** (benchmark performance history = google benchmark json output) to generate an **index.html report** displaying your benchmark's performance along with a graphical step (slowdown) estimation indicator:
 
 ```
-usage: rolling_compare.py [-h] [-d DIRECTORY] [-w SLIDINGWINDOW]
+usage: benchmark_monitor.py [-h] [-d DIRECTORY] [-w SLIDINGWINDOW]
                           [-s MAXSAMPLES] [-f MEDIANFILTER] [-a ALPHAVALUE]
                           [-c CONTROLBENCHMARKNAME] [-x DISCARD]
                           [-sx STARTINDEX] [-ex ENDINDEX] [-m METRIC]
@@ -119,16 +119,16 @@ cd build
 cmake --build . --config Release
 ```
 
-next, run the line below (it will simulate 30 builds, each time running and outputting the benchmark results to a separate file to simulate a build history). After each build, an analysis (rolling_compare.py) is run to see if the benchmark results indicate a slowdown:
+next, run the line below (it will simulate 30 builds, each time running and outputting the benchmark results to a separate file to simulate a build history). After each build, an analysis (benchmark_monitor.py) is run to see if the benchmark results indicate a slowdown:
 
 ```
 (in a windows cmd prompt)
-for /L %a in (1,1,30) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\rolling_compare.py -d . -w 6 -a 0.01
+for /L %a in (1,1,30) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -a 0.01
 ```
 
 **nb. You can tune the analysis by decreasing the alpha value (the default is 0.05) ie. the noisier the environment is the lower the alpha value should be i.e. above I've assumed a relatively noisy machine so set the alpha value to 0.01**
 
-rolling_compare.py will report `BENCHMARK [benchmark_name] STEP CHANGE IN PERFORMANCE ENCOUNTERED` for each benchmark that appears to have a consistent step change in its performance when comparing the "recent builds window" (the -b parameter to rolling_compare that indicates the size of the recent build window which, in the case above is set to 6). 
+benchmark_monitor.py will report `BENCHMARK [benchmark_name] STEP CHANGE IN PERFORMANCE ENCOUNTERED` for each benchmark that appears to have a consistent step change in its performance when comparing the "recent builds window" (the -b parameter to benchmark_monitor that indicates the size of the recent build window which, in the case above is set to 6). 
 
 next, let's introduce a slow down in the code, to do this, open main.cpp and uncomment the line beneath the `// UNCOMMENT THIS` comment
 
@@ -140,13 +140,12 @@ cmake --build . --config Release
 next, perform 10 more runs of the benchmark and, after each build, run an analysis to see if the benchmark results indicate a slowdown:
 ```
 (in a windows cmd prompt)
-for /L %a in (1,1,10) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\rolling_compare.py -d . -w 6
+for /L %a in (1,1,10) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6
 ```
 
 **Finally, you can simulate a noisy environment by re-running the experiment whilst performing other tasks on your machine. If you do this then you should decrease the alpha value as described above.**
 
 # Improvements (Future Work)
 
-1. **Improved spike / trough removal** - currently uses median filtering but other forms of filtering should be explored that remove high frequency spikes and troughs whilst preserving low frequency step changes
-2. **Removing background noise** - step changes in benchmark performance can occurr when the benchmark machine consistently slows down (or speeds up). This can be removed using signal processing techniques (i.e. spectral subtraction) if the noise signal can be captured in parralel with the benchmark. This might be done by capturing a "tick" sample at regular intervals during the course of running each benchmark that can be subtracted from the benchmark signal (where the benchmark signal = clean signal + noise signal)  
-3. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
+1. **Removing background noise** - step changes in benchmark performance can occurr when the benchmark machine consistently slows down (or speeds up). This can be removed using signal processing techniques (i.e. spectral subtraction) if the noise signal can be captured in parralel with the benchmark. This might be done by capturing a "tick" sample at regular intervals during the course of running each benchmark that can be subtracted from the benchmark signal (where the benchmark signal = clean signal + noise signal)  
+2. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).

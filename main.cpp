@@ -1,4 +1,5 @@
 #include <benchmark/benchmark.h>
+#include <time.h>
 
 #include <cassert>
 #include <cstdlib>
@@ -6,7 +7,6 @@
 #include <thread>
 #include <vector>
 
-using namespace std;
 typedef std::vector<int> VALS;
 
 int max_sub_array_greedy(const VALS& vals, int start_at, int end_at, int& start_index, int& end_index)
@@ -43,8 +43,8 @@ static void BM_greedy(benchmark::State& s)
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for(auto _ : s)
     {
-        // UNCOMMENT THIS
-        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // UNCOMMENT THIS (introduces slow down by performing same code twice)
+        //max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
         max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
     }
 }
