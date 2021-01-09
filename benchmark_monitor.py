@@ -23,9 +23,9 @@ def ensureDir(file_path):
 def create_parser():
     parser = ArgumentParser(description='Performs a sliding window analysis of benchmark history in order to help spot slowdown in performance and provide an estimate on where the slowdown occurred. Generates a plot of each benchmark performance with a graphical indicator as to where the most recent step change (slowdown) in performance occurred')
     parser.add_argument('-d', '--directory', help="Directory containing benchmark result json files to process")
-    parser.add_argument('-w', '--slidingwindow', help="The size of the benchmark comparison sliding window", type=int, default=9)
+    parser.add_argument('-w', '--slidingwindow', help="The size of the benchmark comparison sliding window", type=int, default=6)
     parser.add_argument('-s', '--maxsamples', help="The maximum number of benchmarks (including slidingwindow) to run analysis on (0 == all builds)", type=int, default=0)
-    parser.add_argument('-f', '--medianfilter', help="The median filter kernel size i.e. the number of points around each data value to smooth accross in order to eliminate temporary peaks and troughs in benchmark performance", type=int, default=3)
+    parser.add_argument('-f', '--medianfilter', help="The median filter kernel size i.e. the number of points around each data value to smooth accross in order to eliminate temporary peaks and troughs in benchmark performance", type=int, default=9)
     parser.add_argument('-a', '--alphavalue', help="The alpha value at which we reject the hypothesis that the sliding window of benchmarks equals the benchmark history. Typical value is around 0.05 to 0.01. The noisier the environment the lower this value should be.", type=float, default=0.05)
     parser.add_argument('-c', '--controlbenchmarkname', help="The control benchmark name (not yet implemented)")
     parser.add_argument('-x', '--discard', help="(DEBUG) The number of (most recent) records to ignore. This is useful when wanting to debug scenarios in a sub region of the history", type=int, default=-1)
