@@ -1,6 +1,6 @@
 # Automated performance monitoring
 
-A utility to assist in automating performance monitoring of your google benchmark benchmarks with a complete step by step guide below on its use. The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This proof of concept instead looks for consistent step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks. 
+A small utility that looks for step changes (slowdowns) in your google benchmark run history. The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). 
 
 ```
 rolling_compare.py -d [your_google_benchmark_performance_history_directory]

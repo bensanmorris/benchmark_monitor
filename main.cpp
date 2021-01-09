@@ -44,11 +44,11 @@ static void BM_greedy(benchmark::State& s)
     for(auto _ : s)
     {
         // UNCOMMENT THIS
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
         max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
     }
 }
-BENCHMARK(BM_greedy)->Unit(benchmark::TimeUnit::kMillisecond);
+BENCHMARK(BM_greedy);
 
 inline int max_crossing_sub_array(const VALS& vals, int start_at, int mid, int end_at, int& start_index, int& end_index)
 {
@@ -133,11 +133,9 @@ static void BM_logarithmic(benchmark::State& s)
     }
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for (auto _ : s) {
-        // UNCOMMENT THIS
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         max = max_sub_array_logarithmic(data, 0, data.size() - 1, start_index, end_index);
     }
 }
-BENCHMARK(BM_logarithmic)->Unit(benchmark::TimeUnit::kMillisecond);
+BENCHMARK(BM_logarithmic);
 
 BENCHMARK_MAIN();
