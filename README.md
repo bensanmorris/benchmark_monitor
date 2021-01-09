@@ -6,7 +6,7 @@ A small utility that looks for step changes (slowdowns) in your google benchmark
 benchmark_monitor.py -d [your_google_benchmark_performance_history_directory]
 ```
 
-The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). 
+The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). I'm using it to good effect in [my side project](http://www.fireflytech.org) so wanted to share.
 
 
 A sample report:
