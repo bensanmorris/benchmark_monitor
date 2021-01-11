@@ -155,6 +155,6 @@ for /L %a in (1,1,20) Do Release\max_sub_array.exe --benchmark_out=%aresults.jso
 1. **Removing background noise** - step changes in benchmark performance can occurr when the benchmark machine consistently slows down (or speeds up). This can be removed using signal processing techniques (i.e. spectral subtraction) if the noise signal can be captured in parralel with the benchmark. This might be done by capturing a "tick" sample at regular intervals during the course of running each benchmark that can be subtracted from the benchmark signal (where the benchmark signal = clean signal + noise signal)  
 2. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
 
-# Patreon
+# Tip Jar / Patreon
 
-[If you want to keep this code monkey in bananas then you can support me over on Patreon, thanks!](https://www.patreon.com/SimulationStarterKit)
+If you find this project useful and want to buy me a coffee then you can do so via my itch.io page by [downloading my free software and making a donation as part of that process here](https://benmorris.itch.io/plugin-based-scene-editor). [Alternatively if you want to keep this code monkey in bananas then you can support me over on Patreon, thanks!](https://www.patreon.com/SimulationStarterKit)
