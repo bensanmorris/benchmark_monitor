@@ -157,4 +157,4 @@ for /L %a in (1,1,20) Do Release\max_sub_array.exe --benchmark_out=%aresults.jso
 
 # Tip Jar / Patreon
 
-If you find this project useful and want to buy me a coffee then you can do so via my itch.io page by [downloading my free software and making a donation as part of that process here](https://benmorris.itch.io/plugin-based-scene-editor). [Alternatively if you want to keep this code monkey in bananas then you can support me over on Patreon, thanks!](https://www.patreon.com/SimulationStarterKit)
+If you find this project useful and want to buy me a coffee then you can do so via my itch.io page by [downloading my free software and making a donation as part of that process here](https://benmorris.itch.io/plugin-based-scene-editor). Alternatively if you want to keep this code monkey in bananas then you can [support me over on Patreon, thanks!](https://www.patreon.com/SimulationStarterKit)
