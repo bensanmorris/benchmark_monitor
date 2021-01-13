@@ -78,11 +78,8 @@ def estimateStepLocation(values):
     peaks, troughs = turningpoints(dary_step)
     if(len(peaks)) == 0:
         return 0;
-    
-    # plot slowdown location indicator
-    step_max_idx  = peaks[-1]
-    plt.plot((step_max_idx, step_max_idx), (np.min(values), np.max(values)), 'r')
-    
+
+    step_max_idx = peaks[-1]
     return step_max_idx
     
 def hasSlowedDown(benchmark, raw_values, smoothedvalues, slidingwindow, alphavalue, metric):
@@ -90,11 +87,20 @@ def hasSlowedDown(benchmark, raw_values, smoothedvalues, slidingwindow, alphaval
     sample_a_len = sample_count - slidingwindow
     sample_b_len = slidingwindow
     
-    # add raw and smoothed values to plot
-    plt.plot(raw_values, 'g')
-    plt.plot(smoothedvalues, 'b')
+    # plot raw and smoothed values
+    plt.plot(raw_values, '-g', label="raw")
+    plt.plot(smoothedvalues, '-b', label="smoothed")
     plt.ylabel(metric)
     plt.xlabel('sample #')
+    
+    # plot line fit
+    x_vals  = np.arange(0, len(raw_values), 1)
+    y_vals  = raw_values
+    model   = np.polyfit(x_vals, y_vals, 1)
+    predict = np.poly1d(model)
+    lrx     = range(0, len(x_vals))
+    lry     = predict(lrx)
+    plt.plot(lrx, lry, 'tab:orange', label="linear regression")
 
     # mw test
     sample_a = smoothedvalues[:sample_a_len]
@@ -201,13 +207,14 @@ def main():
                     print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SLOWDOWN) - likely occurred somewhere between this build and this build minus ' + str(sample_count - step_max_idx) + ']')
                     
                     # plot step location
-                    plt.plot((step_max_idx, step_max_idx), (np.min(raw_values), np.max(raw_values)), 'r')
+                    plt.plot((step_max_idx, step_max_idx), (np.min(raw_values), np.max(raw_values)), 'r', label="slowdown location estimation")
                 else:
                     print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SPEEDUP) - ignoring')
             else:
                 print('\tBENCHMARK ' + benchmark + ' step index is 0 - likely speedup, ignoring')
-                
+
         plt.title('\n'.join(wrap(benchmark, 50)))
+        plt.legend(loc="upper left")
         figurePath = os.path.join(args.outputdirectory, benchmark+".png")
         ensureDir(figurePath)
         plt.tight_layout()
