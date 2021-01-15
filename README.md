@@ -1,4 +1,4 @@
-# Automated performance monitoring
+# Automated performance monitoring (C++ / Google benchmark)
 
 A small utility that looks for step changes (slowdowns) in your google benchmark run history. It produces a report (**index.html**) containing a chart for each benchmark with a slowdown indicator indicating where a step-change (slowdown) in performance occurred. Simply accumulate your google benchmark run history and then run the benchmark_monitor_utility:
 
