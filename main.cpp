@@ -1,11 +1,42 @@
 #include <benchmark/benchmark.h>
 #include <time.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
+#include <numeric>
 #include <thread>
 #include <vector>
+
+#if defined( __WIN32__ ) || defined( _WIN32 ) || defined( WIN32 ) || defined( _WINDOWS )
+#define NOMINMAX
+#include "windows.h"
+#include "psapi.h"
+#define MEMORY_MONITOR_BEGIN \
+    bool memory_monitor_stop = false; \
+    std::vector<double> memory_samples; \
+    std::thread t([&] () { \
+        while (!memory_monitor_stop) { \
+            PROCESS_MEMORY_COUNTERS_EX pmc; \
+            GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)); \
+            double physicalMem = (float)pmc.WorkingSetSize / 1024.f / 1024.f; \
+            memory_samples.push_back(physicalMem); \
+        } \
+    });
+
+#define MEMORY_MONITOR_END \
+    memory_monitor_stop = true; \
+    t.join(); \
+    s.counters["MaxPhysicalMem"] = *std::max_element(memory_samples.begin(), memory_samples.end()); \
+    s.counters["MinPhysicalMem"] = *std::min_element(memory_samples.begin(), memory_samples.end()); \
+    s.counters["AvgPhysicalMem"] = std::accumulate(memory_samples.begin(), memory_samples.end(), 0.f) / memory_samples.size();
+
+#else
+// TODO
+#define MEMORY_MONITOR_BEGIN
+#define MEMORY_MONITOR_END
+#endif
 
 typedef std::vector<int> VALS;
 
@@ -40,6 +71,8 @@ static void BM_greedy(benchmark::State& s)
         data.push_back(rand());
     }
     
+    MEMORY_MONITOR_BEGIN
+
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for(auto _ : s)
     {
@@ -47,6 +80,8 @@ static void BM_greedy(benchmark::State& s)
         //max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
         max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
     }
+
+    MEMORY_MONITOR_END
 }
 BENCHMARK(BM_greedy);
 
@@ -131,10 +166,15 @@ static void BM_logarithmic(benchmark::State& s)
     for (int i = 0; i < DATA_LEN; i++) {
         data.push_back(rand());
     }
+
+    MEMORY_MONITOR_BEGIN
+
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for (auto _ : s) {
         max = max_sub_array_logarithmic(data, 0, data.size() - 1, start_index, end_index);
     }
+
+    MEMORY_MONITOR_END
 }
 BENCHMARK(BM_logarithmic);
 
