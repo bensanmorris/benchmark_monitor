@@ -156,7 +156,6 @@ for /L %a in (1,1,20) Do Release\max_sub_array.exe --benchmark_out=%aresults.jso
 
 1. Potentially use a control benchmark (the code for which doesn't change) that runs in parallel with each benchmark (and that generates a benchmark specific counter) to help normalise (scale) a benchmark's metrics relative to the control benchmark counter to help reduce the effect of machine noise (speedup / slowdown).
 2. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
-3. Potentially use a control benchmark (the code for which doesn't change) that runs in parallel with each benchmark (and that generates a benchmark specific counter) to help normalise (scale) a benchmark's metrics relative to the control benchmark counter to help reduce the effect of machine noise (speedup / slowdown).
 
 # Tip Jar / Patreon
 
