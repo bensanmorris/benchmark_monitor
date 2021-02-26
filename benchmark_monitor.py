@@ -21,7 +21,7 @@ def ensureDir(file_path):
         os.makedirs(directory)
 
 def create_parser():
-    parser = ArgumentParser(description='Performs a sliding window analysis of benchmark history in order to help spot slowdown in performance and provide an estimate on where the slowdown occurred. Generates a plot of each benchmark performance with a graphical indicator as to where the most recent step change (slowdown) in performance occurred')
+    parser = ArgumentParser(description='Generates a chart for each google benchmark across a benchmark history with optional step change detection.')
     parser.add_argument('-d', '--directory', help="Directory containing benchmark result json files to process")
     parser.add_argument('-w', '--slidingwindow', help="The size of the benchmark comparison sliding window", type=int, default=6)
     parser.add_argument('-s', '--maxsamples', help="The maximum number of benchmarks (including slidingwindow) to run analysis on (0 == all builds)", type=int, default=0)
@@ -33,6 +33,7 @@ def create_parser():
     parser.add_argument('-ex', '--endindex', help="(DEBUG - Alternative addressing scheme) The index to end the analysis at", type=int, default=-1)
     parser.add_argument('-m', '--metric', help="The benchmark metric to track", default="real_time")
     parser.add_argument('-o', '--outputdirectory', help="The index.html report output directory")
+    parser.add_argument('-sc', '--detectstepchanges', help="Detect step changes", default=False, action="store_true")
     args = parser.parse_args()
     if args.directory is None:
         args.directory = os.getcwd()
@@ -86,12 +87,6 @@ def hasSlowedDown(benchmark, raw_values, smoothedvalues, slidingwindow, alphaval
     sample_count = len(raw_values)
     sample_a_len = sample_count - slidingwindow
     sample_b_len = slidingwindow
-    
-    # plot raw and smoothed values
-    plt.plot(raw_values, '-g', label="raw")
-    plt.plot(smoothedvalues, '-b', label="smoothed")
-    plt.ylabel(metric)
-    plt.xlabel('sample #')
     
     # plot line fit
     x_vals  = np.arange(0, len(raw_values), 1)
@@ -195,9 +190,15 @@ def main():
             
         # apply a median filter to the data to smooth out temporary spikes
         smoothedValues = smooth(np.array(raw_values), args.medianfilter)
+        
+        # plot raw and smoothed values
+        plt.plot(raw_values, '-g', label="raw")
+        plt.plot(smoothedValues, '-b', label="smoothed")
+        plt.ylabel(args.metric)
+        plt.xlabel('sample #')
 
         # has it slowed down?
-        if hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, args.metric):
+        if args.detectstepchanges and hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, args.metric):
        
             # estimate step location
             step_max_idx  = estimateStepLocation(smoothedValues)
