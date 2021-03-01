@@ -31,7 +31,7 @@ def create_parser():
     parser.add_argument('-x', '--discard', help="(DEBUG) The number of (most recent) records to ignore. This is useful when wanting to debug scenarios in a sub region of the history", type=int, default=-1)
     parser.add_argument('-sx', '--startindex', help="(DEBUG - Alternative addressing scheme) The index to start the analysis at", type=int, default=-1)
     parser.add_argument('-ex', '--endindex', help="(DEBUG - Alternative addressing scheme) The index to end the analysis at", type=int, default=-1)
-    parser.add_argument('-m', '--metric', help="The benchmark metric to track", default="real_time")
+    parser.add_argument('-m', '--metric', help="The benchmark metric(s) to track", default=["real_time"], nargs="*")
     parser.add_argument('-o', '--outputdirectory', help="The index.html report output directory")
     parser.add_argument('-sc', '--detectstepchanges', help="Detect step changes", default=False, action="store_true")
     args = parser.parse_args()
@@ -158,70 +158,72 @@ def main():
             files      = files[fileCount-maxsamples-1:fileCount-1]
     
     # parse them, return python dictionary of lists where the key is the benchmark name and the value is a python list of values recorded for that benchmark accross all files
-    benchmarks = {}
-    for entry in files:
-        if entry.path.endswith('.json') and entry.is_file():
-            try:
-                parse_benchmark_file(entry.path, benchmarks, args.metric)
-            except:
-                print('Corrupt benchmark file encountered, skipping...')
-                
-    # analyse benchmarks
-    plots = []
-    for benchmark in benchmarks:
-    
-        # check we have enough records for this benchmark (if not then skip it)
-        raw_values   = benchmarks[benchmark]
-        sample_count = len(raw_values)
-        print('found ' + str(sample_count) + ' benchmark records for benchmark ' + benchmark)
-        if sample_count < 10 + args.slidingwindow:
-            print('BENCHMARK: ' + benchmark + ' needs more data, skipping...')
-            continue
-            
-        # apply a median filter to the data to smooth out temporary spikes
-        smoothedValues = smooth(np.array(raw_values), args.medianfilter)
-        
-        # plot raw and smoothed values
-        plt.plot(raw_values, '-g', label="raw")
-        plt.plot(smoothedValues, '-b', label="smoothed")
-        plt.ylabel(args.metric)
-        plt.xlabel('sample #')
-        
-        # plot line fit
-        x_vals  = np.arange(0, len(raw_values), 1)
-        y_vals  = raw_values
-        model   = np.polyfit(x_vals, y_vals, 1)
-        predict = np.poly1d(model)
-        lrx     = range(0, len(x_vals))
-        lry     = predict(lrx)
-        plt.plot(lrx, lry, 'tab:orange', label="linear regression")
-
-        # has it slowed down?
-        if args.detectstepchanges and hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, args.metric):
-       
-            # estimate step location
-            step_max_idx  = estimateStepLocation(smoothedValues)
-            if step_max_idx > 0 and step_max_idx < sample_count:
-                print('step_max_idx = ' + str(step_max_idx))
-                if (smoothedValues[step_max_idx+1] > smoothedValues[step_max_idx-1]):
-                    print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SLOWDOWN) - likely occurred somewhere between this build and this build minus ' + str(sample_count - step_max_idx) + ']')
+    metrics    = args.metric
+    plots      = []
+    for metric in metrics:
+        benchmarks = {}
+        for entry in files:
+            if entry.path.endswith('.json') and entry.is_file():
+                try:
+                    parse_benchmark_file(entry.path, benchmarks, metric)
+                except:
+                    print('Corrupt benchmark file encountered, skipping...')
                     
-                    # plot step location
-                    plt.plot((step_max_idx, step_max_idx), (np.min(raw_values), np.max(raw_values)), 'r', label="slowdown location estimation")
-                else:
-                    print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SPEEDUP) - ignoring')
-            else:
-                print('\tBENCHMARK ' + benchmark + ' step index is 0 - likely speedup, ignoring')
+        # analyse benchmarks
+        for benchmark in benchmarks:
+        
+            # check we have enough records for this benchmark (if not then skip it)
+            raw_values   = benchmarks[benchmark]
+            sample_count = len(raw_values)
+            print('found ' + str(sample_count) + ' benchmark records for benchmark ' + benchmark)
+            if sample_count < 10 + args.slidingwindow:
+                print('BENCHMARK: ' + benchmark + ' needs more data, skipping...')
+                continue
+                
+            # apply a median filter to the data to smooth out temporary spikes
+            smoothedValues = smooth(np.array(raw_values), args.medianfilter)
+            
+            # plot raw and smoothed values
+            plt.plot(raw_values, '-g', label="raw")
+            plt.plot(smoothedValues, '-b', label="smoothed")
+            plt.ylabel(metric)
+            plt.xlabel('sample #')
+            
+            # plot line fit
+            x_vals  = np.arange(0, len(raw_values), 1)
+            y_vals  = raw_values
+            model   = np.polyfit(x_vals, y_vals, 1)
+            predict = np.poly1d(model)
+            lrx     = range(0, len(x_vals))
+            lry     = predict(lrx)
+            plt.plot(lrx, lry, 'tab:orange', label="linear regression")
 
-        plt.title('\n'.join(wrap(benchmark, 50)))
-        plt.legend(loc="upper left")
-        figurePath = os.path.join(args.outputdirectory, benchmark+".png")
-        ensureDir(figurePath)
-        plt.tight_layout()
-        plt.savefig(figurePath)
-        plt.clf()
-        plotItem = dict(path=os.path.relpath(figurePath, args.outputdirectory))
-        plots.append(plotItem)
+            # has it slowed down?
+            if args.detectstepchanges and hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, metric):
+           
+                # estimate step location
+                step_max_idx  = estimateStepLocation(smoothedValues)
+                if step_max_idx > 0 and step_max_idx < sample_count:
+                    print('step_max_idx = ' + str(step_max_idx))
+                    if (smoothedValues[step_max_idx+1] > smoothedValues[step_max_idx-1]):
+                        print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SLOWDOWN) - likely occurred somewhere between this build and this build minus ' + str(sample_count - step_max_idx) + ']')
+                        
+                        # plot step location
+                        plt.plot((step_max_idx, step_max_idx), (np.min(raw_values), np.max(raw_values)), 'r', label="slowdown location estimation")
+                    else:
+                        print('\tBENCHMARK ' + benchmark + ' STEP CHANGE IN PERFORMANCE ENCOUNTERED (SPEEDUP) - ignoring')
+                else:
+                    print('\tBENCHMARK ' + benchmark + ' step index is 0 - likely speedup, ignoring')
+
+            plt.title('\n'.join(wrap(benchmark, 50)))
+            plt.legend(loc="upper left")
+            figurePath = os.path.join(args.outputdirectory, benchmark+"-"+metric+".png")
+            ensureDir(figurePath)
+            plt.tight_layout()
+            plt.savefig(figurePath)
+            plt.clf()
+            plotItem = dict(path=os.path.relpath(figurePath, args.outputdirectory))
+            plots.append(plotItem)
         
     # generate report
     env      = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')), autoescape=select_autoescape(['html', 'xml']))
