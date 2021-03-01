@@ -9,31 +9,37 @@
 #include <thread>
 #include <vector>
 
+constexpr auto MB_BYTES = 1024 * 1024;
+
 #if defined( __WIN32__ ) || defined( _WIN32 ) || defined( WIN32 ) || defined( _WINDOWS )
 #define NOMINMAX
 #include "windows.h"
 #include "psapi.h"
 #define MEMORY_MONITOR_BEGIN \
     bool memory_monitor_stop = false; \
-    std::vector<double> memory_samples; \
+    double max_physical_memory = 0.f; \
+    double max_virtual_memory = 0.f; \
     std::thread t([&] () { \
         while (!memory_monitor_stop) { \
             PROCESS_MEMORY_COUNTERS_EX pmc; \
             GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)); \
-            double physicalMem = (float)pmc.WorkingSetSize / 1024.f / 1024.f; \
-            memory_samples.push_back(physicalMem); \
+            double tmp = (float)pmc.WorkingSetSize / MB_BYTES; \
+            if(tmp > max_physical_memory) \
+                max_physical_memory = tmp; \
+            tmp = (float)pmc.PrivateUsage / MB_BYTES; \
+            if(tmp > max_virtual_memory) \
+                max_virtual_memory = tmp; \
         } \
     });
 
 #define MEMORY_MONITOR_END \
     memory_monitor_stop = true; \
     t.join(); \
-    s.counters["MaxPhysicalMem"] = *std::max_element(memory_samples.begin(), memory_samples.end()); \
-    s.counters["MinPhysicalMem"] = *std::min_element(memory_samples.begin(), memory_samples.end()); \
-    s.counters["AvgPhysicalMem"] = std::accumulate(memory_samples.begin(), memory_samples.end(), 0.f) / memory_samples.size();
+    s.counters["MaxProcPhysMem"] = max_physical_memory; \
+    s.counters["MaxProcVirtMem"] = max_virtual_memory;
 
 #else
-// TODO
+// Not yet implemented
 #define MEMORY_MONITOR_BEGIN
 #define MEMORY_MONITOR_END
 #endif
