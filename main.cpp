@@ -2,6 +2,7 @@
 #include <time.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -16,7 +17,7 @@ constexpr auto MB_BYTES = 1024 * 1024;
 #include "windows.h"
 #include "psapi.h"
 #define MEMORY_MONITOR_BEGIN \
-    bool memory_monitor_stop = false; \
+    std::atomic_bool memory_monitor_stop = false; \
     double max_physical_memory = 0.f; \
     double max_virtual_memory = 0.f; \
     std::thread t([&] () { \
