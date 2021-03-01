@@ -87,15 +87,6 @@ def hasSlowedDown(benchmark, raw_values, smoothedvalues, slidingwindow, alphaval
     sample_count = len(raw_values)
     sample_a_len = sample_count - slidingwindow
     sample_b_len = slidingwindow
-    
-    # plot line fit
-    x_vals  = np.arange(0, len(raw_values), 1)
-    y_vals  = raw_values
-    model   = np.polyfit(x_vals, y_vals, 1)
-    predict = np.poly1d(model)
-    lrx     = range(0, len(x_vals))
-    lry     = predict(lrx)
-    plt.plot(lrx, lry, 'tab:orange', label="linear regression")
 
     # mw test
     sample_a = smoothedvalues[:sample_a_len]
@@ -128,14 +119,13 @@ def smooth(x,window_len=11,window='hanning'):
         raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
     s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
-    #print(len(s))
     if window == 'flat': #moving average
         w=np.ones(window_len,'d')
     else:
         w=eval('np.'+window+'(window_len)')
 
     y=np.convolve(w/w.sum(),s,mode='valid')
-    return y
+    return y[0:len(x)]
 
 def main():
     args = create_parser()
@@ -196,6 +186,15 @@ def main():
         plt.plot(smoothedValues, '-b', label="smoothed")
         plt.ylabel(args.metric)
         plt.xlabel('sample #')
+        
+        # plot line fit
+        x_vals  = np.arange(0, len(raw_values), 1)
+        y_vals  = raw_values
+        model   = np.polyfit(x_vals, y_vals, 1)
+        predict = np.poly1d(model)
+        lrx     = range(0, len(x_vals))
+        lry     = predict(lrx)
+        plt.plot(lrx, lry, 'tab:orange', label="linear regression")
 
         # has it slowed down?
         if args.detectstepchanges and hasSlowedDown(benchmark, raw_values, smoothedValues, args.slidingwindow, args.alphavalue, args.metric):
