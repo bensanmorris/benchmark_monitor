@@ -8,6 +8,18 @@ A small utility that looks for step changes (slowdowns) in your google benchmark
 benchmark_monitor.py -d [your_google_benchmark_performance_history_directory] -sc
 ```
 
+An example that generates charts accross real_time (with step change analysis):
+
+```
+benchmark_monitor.py -d [your_google_benchmark_performance_history_directory] -sc -m real_time
+```
+
+An example that generates charts accross real_time and cpu_time (with step change analysis):
+
+```
+benchmark_monitor.py -d [your_google_benchmark_performance_history_directory] -sc -m real_time cpu_time
+```
+
 The main challenge with automating performance monitoring is the variation in performance of the same code on the same machine accross subsequent runs. It isn't sufficient to compare a run of the benchmarks against a baseline (generated from a previous run) and then comparing the difference against a threshold owing to the variation. This utility instead looks for step changes in the performance of a set of benchmarks in relation to a history of prior runs of the benchmarks (on the same machine). 
 
 
@@ -73,7 +85,7 @@ optional arguments:
                         (DEBUG - Alternative addressing scheme) The index to
                         end the analysis at
   -m METRIC, --metric METRIC
-                        The benchmark metric to track
+                        The benchmark metric(s) to track 
   -o OUTPUTDIRECTORY, --outputdirectory OUTPUTDIRECTORY
                         The index.html report output directory
   -sc, --detectstepchanges
