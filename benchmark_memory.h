@@ -35,7 +35,7 @@ void getMemoryInfo(MemInfo& meminfo) {
 #endif
 
 #define MEMORY_MONITOR_BEGIN \
-    std::atomic_bool memory_monitor_stop = false; \
+    std::atomic_bool memory_monitor_stop(false); \
     benchmark_memory::MemInfo meminfo; \
     std::thread t([&] () { \
         while (!memory_monitor_stop) { \
