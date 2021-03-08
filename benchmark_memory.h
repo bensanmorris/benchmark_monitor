@@ -29,7 +29,7 @@ void getMemoryInfo(MemInfo& meminfo) {
 void getMemoryInfo(MemInfo& meminfo) {
     struct rusage rusage;
     getrusage(RUSAGE_SELF, &rusage);
-    meminfo.process_pmem = rusage.ru_maxrss;
+    meminfo.process_pmem = rusage.ru_maxrss * 1024L;
     meminfo.process_vmem = 0; // TODO
 }
 #endif
