@@ -10,40 +10,7 @@
 #include <thread>
 #include <vector>
 
-constexpr auto MB_BYTES = 1024 * 1024;
-
-#if defined( __WIN32__ ) || defined( _WIN32 ) || defined( WIN32 ) || defined( _WINDOWS )
-#define NOMINMAX
-#include "windows.h"
-#include "psapi.h"
-#define MEMORY_MONITOR_BEGIN \
-    std::atomic_bool memory_monitor_stop = false; \
-    double max_physical_memory = 0.f; \
-    double max_virtual_memory = 0.f; \
-    std::thread t([&] () { \
-        while (!memory_monitor_stop) { \
-            PROCESS_MEMORY_COUNTERS_EX pmc; \
-            GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)); \
-            double tmp = (float)pmc.WorkingSetSize / MB_BYTES; \
-            if(tmp > max_physical_memory) \
-                max_physical_memory = tmp; \
-            tmp = (float)pmc.PrivateUsage / MB_BYTES; \
-            if(tmp > max_virtual_memory) \
-                max_virtual_memory = tmp; \
-        } \
-    });
-
-#define MEMORY_MONITOR_END \
-    memory_monitor_stop = true; \
-    t.join(); \
-    s.counters["MaxProcPhysMem"] = max_physical_memory; \
-    s.counters["MaxProcVirtMem"] = max_virtual_memory;
-
-#else
-// Not yet implemented
-#define MEMORY_MONITOR_BEGIN
-#define MEMORY_MONITOR_END
-#endif
+#include "benchmark_memory.h"
 
 typedef std::vector<int> VALS;
 
