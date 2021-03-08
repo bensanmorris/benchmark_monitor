@@ -40,7 +40,7 @@ void getMemoryInfo(MemInfo& meminfo) {
     std::thread t([&] () { \
         while (!memory_monitor_stop) { \
             benchmark_memory::MemInfo tmp; \
-            getMemoryInfo(tmp); \
+            benchmark_memory::getMemoryInfo(tmp); \
             if(tmp.process_pmem > meminfo.process_pmem) \
                 meminfo.process_pmem = tmp.process_pmem; \
             if(tmp.process_vmem > meminfo.process_vmem) \
