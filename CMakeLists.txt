@@ -9,6 +9,7 @@ set(BENCHMARK_ENABLE_TESTING FALSE)
 include(FetchContent)
 FetchContent_Declare(googlebenchmark
     GIT_REPOSITORY https://github.com/google/benchmark
+    GIT_TAG        main
 )
 FetchContent_MakeAvailable(googlebenchmark)
 
