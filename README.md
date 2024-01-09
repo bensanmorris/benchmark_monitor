@@ -105,6 +105,7 @@ Demo prerequisites:
 
 - [Python 3.7.4](https://www.python.org/downloads/release/python-374/)
 - [CMake](https://cmake.org/download/) - needs to be on your PATH (it will be if you're on Windows and use the installer)
+- [Visual Studio 2019](https://visualstudio.microsoft.com/vs/older-downloads/)
 
 The format of this step by step demo:
 
