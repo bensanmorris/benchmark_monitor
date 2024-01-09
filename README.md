@@ -130,9 +130,9 @@ env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-generate build files for VS 2017:
+generate build files for VS 2019:
 ```
-cmake -B build -G "Visual Studio 15 2017" -A x64 .
+cmake -B build -G "Visual Studio 16 2019" -A x64 .
 ```
 
 build the demo:

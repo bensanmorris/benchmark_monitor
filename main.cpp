@@ -47,6 +47,8 @@ static void BM_greedy(benchmark::State& s)
         //max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
         max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
     }
+
+    std::cout << max << std::endl;
 }
 BENCHMARK(BM_greedy);
 
@@ -135,6 +137,8 @@ static void BM_logarithmic(benchmark::State& s)
     for (auto _ : s) {
         max = max_sub_array_logarithmic(data, 0, data.size() - 1, start_index, end_index);
     }
+
+    std::cout << max << std::endl;
 }
 BENCHMARK(BM_logarithmic);
 
