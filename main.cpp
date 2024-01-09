@@ -50,12 +50,16 @@ static void BM_greedy(benchmark::State& s)
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for(auto _ : s)
     {
-        // UNCOMMENT THIS (introduces slow down by performing same code twice)
-        //max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
-        max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
+        // UNCOMMENT THIS (introduces slow down by performing same code a number of times - informed by the demo machine capabilities)
+        //for(int i = 0; i < 10 * std::thread::hardware_concurrency(); i++)
+        {
+            max = max_sub_array_greedy(data, 0, data.size(), start_index, end_index);
+        }
     }
 
     MEMORY_MONITOR_END
+
+    std::cout << max << std::endl;
 }
 BENCHMARK(BM_greedy);
 
@@ -149,6 +153,8 @@ static void BM_logarithmic(benchmark::State& s)
     }
 
     MEMORY_MONITOR_END
+
+    std::cout << max << std::endl;
 }
 BENCHMARK(BM_logarithmic);
 
