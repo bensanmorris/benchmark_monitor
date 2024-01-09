@@ -45,7 +45,7 @@ static void BM_greedy(benchmark::State& s)
         data.push_back(rand());
     }
     
-    MEMORY_MONITOR_BEGIN
+    MEMORY_MONITOR_BEGIN // my custom counter for capturing mem usage - start
 
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for(auto _ : s)
@@ -57,7 +57,7 @@ static void BM_greedy(benchmark::State& s)
         }
     }
 
-    MEMORY_MONITOR_END
+    MEMORY_MONITOR_END  // my custom counter for capturing mem usage - end
 
     std::cout << max << std::endl;
 }
@@ -145,14 +145,14 @@ static void BM_logarithmic(benchmark::State& s)
         data.push_back(rand());
     }
 
-    MEMORY_MONITOR_BEGIN
+    MEMORY_MONITOR_BEGIN // my custom counter for capturing mem usage - start
 
     int start_index = 0, end_index = 0, max = std::numeric_limits<int>::min();
     for (auto _ : s) {
         max = max_sub_array_logarithmic(data, 0, data.size() - 1, start_index, end_index);
     }
 
-    MEMORY_MONITOR_END
+    MEMORY_MONITOR_END  // my custom counter for capturing mem usage - end
 
     std::cout << max << std::endl;
 }
