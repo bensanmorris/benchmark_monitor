@@ -183,6 +183,8 @@ for /L %a in (51,1,70) Do Release\max_sub_array.exe --benchmark_out=%aresults.js
 - https://github.com/google/benchmark/blob/main/docs/user_guide.md
 - https://stackoverflow.com/questions/48000663/step-detection-in-one-dimensional-data/48001937
 - https://people.irisa.fr/Michele.Basseville/kniga/
+- https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html
+- https://thestatsgeek.com/2014/04/12/is-the-wilcoxon-mann-whitney-test-a-good-non-parametric-alternative-to-the-t-test/)
 
 # Tip Jar / Patreon
 
