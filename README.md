@@ -142,11 +142,16 @@ cd build
 cmake --build . --config Release
 ```
 
-next, run the line below (it will simulate 50 benchmark runs, each time running and outputting the benchmark results to a separate file to simulate a benchmark run history). After each run, an analysis (benchmark_monitor.py) is performed to see if the benchmark results indicate a slowdown:
+next, run the line below (it will simulate 50 benchmark runs, each time running and outputting the benchmark results to a separate file to simulate a benchmark run history). After each run, an analysis (benchmark_monitor.py) is performed to see if the benchmark results indicate a slowdown.
+
+NB. In the run below we will generate charts for the following metrics:
+
+- real_time - a google benchmark metric
+- MaxProcPhysMem - a custom metric of mine that tracks process physical memory 
 
 ```
 (in a windows cmd prompt)
-for /L %a in (1,1,50) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -a 0.01 -sc
+for /L %a in (1,1,50) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -a 0.01 -sc -m real_time MaxProcPhysMem
 ```
 
 **nb. You can tune the analysis by decreasing the alpha value (the default is 0.05) ie. the noisier the environment is the lower the alpha value should be i.e. above I've assumed a relatively noisy machine so set the alpha value to 0.01**
@@ -163,7 +168,7 @@ cmake --build . --config Release
 next, perform 20 more runs of the benchmark and, after each build, run an analysis to see if the benchmark results indicate a slowdown:
 ```
 (in a windows cmd prompt)
-for /L %a in (51,1,70) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -sc
+for /L %a in (51,1,70) Do Release\max_sub_array.exe --benchmark_out=%aresults.json && ..\benchmark_monitor.py -d . -w 6 -sc -m real_time MaxProcPhysMem
 ```
 
 **Finally, open index.html and inspect. Nb. you can simulate a noisy environment by re-running the experiment whilst performing other tasks on your machine. If you do this then you should decrease the alpha value as described above.**
