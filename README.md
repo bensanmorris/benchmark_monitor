@@ -178,6 +178,12 @@ for /L %a in (51,1,70) Do Release\max_sub_array.exe --benchmark_out=%aresults.js
 1. Potentially use a control benchmark (the code for which doesn't change) that runs in parallel with each benchmark (and that generates a benchmark specific counter) to help normalise (scale) a benchmark's metrics relative to the control benchmark counter to help reduce the effect of machine noise (speedup / slowdown).
 2. Explore ["Core clock cycles"](https://software.intel.com/content/www/us/en/develop/articles/intel-performance-counter-monitor.html) - described by Agner Fogg and available on Intel CPUs that appear independent of the clock frequency (which can vary depending on load).
 
+# References
+
+- https://github.com/google/benchmark/blob/main/docs/user_guide.md
+- https://stackoverflow.com/questions/48000663/step-detection-in-one-dimensional-data/48001937
+- https://people.irisa.fr/Michele.Basseville/kniga/
+
 # Tip Jar / Patreon
 
 If you find this project useful and want to buy me a coffee then you can do so via my itch.io page by [downloading my free software and making a donation as part of that process here](https://benmorris.itch.io/plugin-based-scene-editor). Alternatively if you want to keep this code monkey in bananas then you can [support me over on Patreon, thanks!](https://www.patreon.com/SimulationStarterKit)
