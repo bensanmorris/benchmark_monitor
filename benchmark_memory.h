@@ -12,8 +12,8 @@
 namespace benchmark_memory {
 
 struct MemInfo {
-    uint64_t process_pmem;
-    uint64_t process_vmem;
+    double process_pmem;
+    double process_vmem;
     MemInfo() :
         process_pmem(0), process_vmem(0) {}
 };
@@ -22,8 +22,8 @@ struct MemInfo {
 void getMemoryInfo(MemInfo& meminfo) {
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-    meminfo.process_pmem = pmc.WorkingSetSize;
-    meminfo.process_vmem = pmc.PrivateUsage;
+    meminfo.process_pmem = static_cast<double>(pmc.WorkingSetSize) / 1024 / 1024;
+    meminfo.process_vmem = static_cast<double>(pmc.PrivateUsage) / 1024 / 1024;
 }
 #elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
 void getMemoryInfo(MemInfo& meminfo) {
